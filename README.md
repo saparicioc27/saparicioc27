@@ -64,8 +64,8 @@ Se implementa en Python llamando a la biblioteca **PuLP** para resolver problema
    - Variables para el posicionamiento relativo entre dos cajas`(a_ij, b_ij, c_ij, d_ij, e_ij, f_ij)`.
 
 3. **Restricciones**:
-   - Restricciones del contenedor.
    - Restricciones de orientación.
+   - Restricciones del contenedor.
    - Restricciones de no solapamiento.
 
 4. **Función Objetivo**:
