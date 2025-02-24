@@ -1,10 +1,10 @@
 # Tarea 1: Problema de Empaquetamiento y Corte 3D (3D-CPP) con Rotación
 
-Este repositorio contiene una implementación en Python del **Problema de Empaquetamiento y Corte 3D (3D-CPP)** utilizando la biblioteca **PuLP**. El problema consiste en empaquetar un conjunto de elementos rectangulares tridimensionales dentro de un único contenedor, maximizando la cantidad de elementos empaquetados. Los elementos pueden rotarse en cualquiera de las seis orientaciones posibles.
+El presente contiene una implementación en Python del **Problema de Empaquetamiento y Corte 3D (3D-CPP)** utilizando la biblioteca **PuLP**. El problema consiste en empacar un conjunto de cajas rectangulares y tridimensionales dentro de un único contenedor, maximizando la cantidad de cajas empacadas. Los cajas pueden ser rotadas en cualquiera de sus seis orientaciones posibles.
 
 ## Descripción del Problema
 
-El **Problema de Empaquetamiento y Corte 3D (3D-CPP)** es un problema de optimización ampliamente estudiado, cuyo objetivo es colocar un conjunto de elementos rectangulares tridimensionales más pequeños dentro de un contenedor de mayor tamaño, sin que se solapen. En este caso, el problema se amplía para permitir la **rotación** de los elementos, lo que significa que cada uno puede ser colocado en cualquiera de las seis orientaciones posibles.
+El **Problema de Empaquetamiento y Corte 3D (3D-CPP)** es un problema de optimización en estudio, el cual tiene como objetivo la ubicación de elementos rectangulares tridimensionales más pequeños dentro de un contenedor de mayor tamaño, sin que dichos elementos se solapen. En este caso, el problema se amplía para permitir la **rotación** de los elementos, lo que significa que cada uno puede ser colocado en cualquiera de las seis orientaciones posibles.
 
 ### Entradas
 - **Dimensiones del contenedor**: Largo `L`, Ancho `W` y Alto `H`.
@@ -196,4 +196,79 @@ El código está implementado en Python utilizando la biblioteca **PuLP** para p
               # Al menos una de las restricciones de no solapamiento se activa
               model += a[i, j] + b[i, j] + c[i, j] + d[i, j] + e[i, j] + f[i, j] >= 1, f"no_overlap_abcdef_{i}_{j}"
       ```
-  8. **Ejecutamos la solución del modelo**: 
+  8. **Ejecutamos la solución del modelo e imprimimos los resultados**:
+     ```bash
+        # Resolvemos el modelo
+         model.solve()
+         
+         # Resultados impresos
+         if pulp.LpStatus[model.status] == "Optimal":
+             print("Solución óptima:")
+             for i in range(n):
+                 print(f"Item {i}: Posición ({x[i].varValue}, {y[i].varValue}, {z[i].varValue}), Orientación (lx={lx[i].varValue}, ly={ly[i].varValue}, lz={lz[i].varValue}, wx={wx[i].varValue}, wy={wy[i].varValue}, wz={wz[i].varValue}, hx={hx[i].varValue}, hy={hy[i].varValue}, hz={hz[i].varValue})")
+         else:
+             print("No se encontró una solución óptima.")
+     
+  9. **Visualización (Opcional)**:
+      - Usa matplotlib para visualizar los resultados
+      ```bash
+        import matplotlib.pyplot as plt
+      from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+      
+      # Posiciones finales de las cajas
+      sol_x = {i: pulp.value(x[i]) for i in range(n)}
+      sol_y = {i: pulp.value(y[i]) for i in range(n)}
+      sol_z = {i: pulp.value(z[i]) for i in range(n)}
+      
+      # Dimensiones reales según la orientación
+      sol_l = {i: items[i][0] * pulp.value(lx[i]) + items[i][1] * pulp.value(wx[i]) + items[i][2] * pulp.value(hx[i]) for i in range(n)}
+      sol_w = {i: items[i][0] * pulp.value(ly[i]) + items[i][1] * pulp.value(wy[i]) + items[i][2] * pulp.value(hy[i]) for i in range(n)}
+      sol_h = {i: items[i][0] * pulp.value(lz[i]) + items[i][1] * pulp.value(wz[i]) + items[i][2] * pulp.value(hz[i]) for i in range(n)}
+      
+      # Figura 3D
+      fig = plt.figure(figsize=(8, 8))
+      ax = fig.add_subplot(111, projection="3d")
+      
+      # Dibujamos el contenedor
+      ax.set_xlim([0, L])
+      ax.set_ylim([0, W])
+      ax.set_zlim([0, H])
+      ax.set_xlabel("X")
+      ax.set_ylabel("Y")
+      ax.set_zlabel("Z")
+      
+      # Función para dibujar cubo
+      def dibujar_cubo(ax, x, y, z, dx, dy, dz, color):
+          vertices = [
+              [[x, y, z], [x + dx, y, z], [x + dx, y + dy, z], [x, y + dy, z]],
+              [[x, y, z+ dz], [x + dx, y, z + dz], [x + dx, y + dy, z + dz], [x, y + dy, z + dz]],
+              [[x, y, z], [x, y, z + dz], [x + dx, y, z + dz], [x + dx, y, z]],
+              [[x, y + dy, z], [x, y + dy, z + dz], [x + dx, y + dy, z + dz], [x + dx, y + dy, z]],
+              [[x, y, z], [x, y + dy, z], [x, y + dy, z + dz], [x, y, z + dz]],
+              [[x + dx, y, z], [x + dx, y + dy, z], [x + dx, y + dy, z + dz], [x + dx, y, z + dz]],
+          ]
+          ax.add_collection3d(Poly3DCollection(vertices, facecolors=color, linewidths=1, edgecolors="k", alpha=0.5))
+      
+      # Dibujar cada caja en la solución
+      colores = plt.cm.get_cmap("tab10", n)
+      for i in range(n):
+          if pulp.value(lx[i]+ly[i]+lz[i]+wx[i]+wy[i]+wz[i]+hx[i]+hy[i]+hz[i])/9 > 0:  # Si el ítem está dentro del contenedor
+              dibujar_cubo(ax, sol_x[i], sol_y[i], sol_z[i], sol_l[i], sol_w[i], sol_h[i], colores(i))
+      
+      plt.title("Visualización 3D de la Solución")
+      plt.show()
+      ```
+   ## Análisis y Posibles Mejoras
+   - Aproximarse a la solución haciendo uso de otros métodos de optimización o algoritmos exactos y partir de los resultados obtenidos para obtener una mejor solución.
+   - Hacer uso de métodos constructivos para aproximarnos a la factibilidad, seguido de métodos heurísticos para encontrar una buena solución más eficientemente al ser este un problema NP-Hard.
+   - Graficar la solución para entender la dinámica del posicionamiento de las cajas, así como para verificar su no solapamiento.
+
+   ## Autoría
+   - Este modelo y su respectivo código fueron desarrollados como parte de una ejercicio de optimización entera-mixta del 3DCPP.
+   - Su formulación obedece a una adaptación propia a un (1) contenedor a partir del modelo generalizado de múltiples contenedores propuesto por Chen et al. (1995), y expuesto por Fernandes et al. (2019) en su artículo "Exact methods for three-dimensional cutting and packing: A
+comparative study concerning single container problems".
+
+   ## Referencias Bibliográficas
+   - Chen, C., Lee, S., & Shen, Q. (1995). "An analytical model for the container loading problem."
+   - Fernandes, E., Machado, T., & Wauters, T. (2019)."Exact methods for three-dimensional cutting and packing: A comparative study concerning single container problems."
+   - PuLP Documentation: https://coin-or.github.io/pulp/
