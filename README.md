@@ -267,5 +267,5 @@ comparative study concerning single container problems".
 
    ## Referencias Bibliográficas
    - Chen, C., Lee, S., & Shen, Q. (1995). "An analytical model for the container loading problem."
-   - Fernandes, E., Machado, T., & Wauters, T. (2019)."Exact methods for three-dimensional cutting and packing: A comparative study concerning single container problems."
+   - Fernandes, E., Machado, T., & Wauters, T. (2019). "Exact methods for three-dimensional cutting and packing: A comparative study concerning single container problems."
    - PuLP Documentation: https://coin-or.github.io/pulp/
