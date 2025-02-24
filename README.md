@@ -1,82 +1,78 @@
 # Tarea 1: Problema de Empaquetamiento y Corte 3D (3D-CPP) con Rotación
 
-El presente contiene una implementación en Python del **Problema de Empaquetamiento y Corte 3D (3D-CPP)** utilizando la biblioteca **PuLP**. El problema consiste en empacar un conjunto de cajas rectangulares y tridimensionales dentro de un único contenedor, maximizando la cantidad de cajas empacadas. Los cajas pueden ser rotadas en cualquiera de sus seis orientaciones posibles.
+El presente contiene una implementación en Python del **Problema de Empaquetamiento y Corte 3D (3D-CPP)** utilizando la biblioteca **PuLP**. El problema consiste en empacar un conjunto de cajas rectangulares y tridimensionales dentro de un único contenedor, maximizando la cantidad de cajas empacadas.
 
 ## Descripción del Problema
 
 El **Problema de Empaquetamiento y Corte 3D (3D-CPP)** es un problema de optimización en estudio, el cual tiene como objetivo la ubicación de elementos rectangulares tridimensionales más pequeños dentro de un contenedor de mayor tamaño, sin que dichos elementos se solapen. En este caso, el problema se amplía para permitir la **rotación** de los elementos, lo que significa que cada uno puede ser colocado en cualquiera de las seis orientaciones posibles.
 
-### Entradas
+### Entradas del modelo
 - **Dimensiones del contenedor**: Largo `L`, Ancho `W` y Alto `H`.
-- **Elementos**: Una lista de objetos rectangulares tridimensionales, donde cada uno está definido por sus dimensiones `(l_i, w_i, h_i)`.
+- **Cajas**: Una lista de cajas rectangulares tridimensionales, donde cada uno está definido por sus dimensiones `(p_i, q_i, r_i)`.
 
-### Salidas
+### Salidas de la implementación del modelo
 - **Posiciones**: Coordenadas `(x_i, y_i, z_i)` de la esquina inferior izquierda frontal de cada elemento.
 - **Orientaciones**: Orientación de cada elemento, indicando qué dimensión (largo, ancho o alto) se alinea con los ejes X, Y o Z.
 
-### Objetivo
-Maximizar la cantidad de elementos empaquetados dentro del contenedor sin que se solapen.
+### Objetivo de la implementación
+Maximizar la cantidad de elementos empaquetados dentro del contenedor, sin que estos se solapen.
 
 ---
 
 ## Formulación Matemática
 
-El problema se modela como un **Problema de Programación Lineal Entera Mixta (MILP)**. Los principales componentes de la formulación son:
+El problema se modela como un **Problema de Programación Lineal Entera Mixta (MILP)**. La formulación se compone principalmente por:
 
 ### Variables de Decisión
-- `x_i, y_i, z_i`: Coordenadas de la esquina inferior izquierda frontal del elemento `i`.
-- `lx_i, ly_i, lz_i`: Variables binarias que indican si la longitud del elemento `i` está alineada con los ejes X, Y o Z.
-- `wx_i, wy_i, wz_i`: Variables binarias que indican si el ancho del elemento `i` está alineado con los ejes X, Y o Z.
-- `hx_i, hy_i, hz_i`: Variables binarias que indican si la altura del elemento `i` está alineada con los ejes X, Y o Z.
-- `a_ij, b_ij, c_ij, d_ij, e_ij, f_ij`: Variables binarias para la posición relativa de los elementos `i` y `j`.
+- `x_i, y_i, z_i`: Coordenadas de la esquina inferior izquierda frontal de la caja `i`.
+- `lx_i, ly_i, lz_i`: Variables binarias que indican si el largo de la caja `i` está alineada con los ejes X, Y o Z.
+- `wx_i, wy_i, wz_i`: Variables binarias que indican si el ancho de la caja `i` está alineado con los ejes X, Y o Z.
+- `hx_i, hy_i, hz_i`: Variables binarias que indican si la altura de la caja `i` está alineada con los ejes X, Y o Z.
+- `a_ij, b_ij, c_ij, d_ij, e_ij, f_ij`: Variables binarias que indican la posición relativa de las cajas `i` y `j`.
 
 ### Restricciones
-1. **Restricciones de Orientación**:
-   - Cada dimensión (largo, ancho y alto) de un elemento debe estar alineada con exactamente un eje.
+1. **Restricciones del Contenedor**:
+   - Cada caja debe caber dentro del contenedor (no puede quedar ninguna por fuera).
+2. **Restricciones de Orientación**:
+   - Cada dimensión (largo, ancho y alto) de un elemento debe estar alineada con exactamente un eje (X, Y o Z).
    - Cada eje (X, Y, Z) debe ser asignado a exactamente una dimensión del objeto.
-
-2. **Restricciones del Contenedor**:
-   - Cada elemento debe caber dentro del contenedor.
-
 3. **Restricciones de No Solapamiento**:
-   - Los elementos no deben superponerse. Esto se garantiza mediante el método **big-M** y el uso de variables binarias de posicionamiento relativo.
+   - Las cajas no deben solaparse. Esto se garantiza para este caso usando el método de la gran-M, así como variables binarias de posicionamiento relativo.
 
 ### Función Objetivo
-Maximizar la cantidad de elementos empaquetados dentro del contenedor.
+Maximizar la cantidad de elementos empacados dentro del contenedor, esto a partir de la suma de las variables que indican la asignación de las dimensiones a los ejes X, Y y Z, 
 
-donde `s_i` es una variable binaria que indica si el elemento `i` está colocado en el contenedor.
-
----
+- Siendo estas variables `lx_i`, `ly_i`, `lz_i`, `wx_i`, `wy_i`, `wz_i`, `hx_i`, `hy_i`, `hz_i` las que asignan las dimensiones de la caja `i` a los ejes del contenedor.
 
 ## Implementación del Código
 
-El código está implementado en Python utilizando la biblioteca **PuLP** para programación lineal. El solucionador utilizado es el solucionador predeterminado incluido con PuLP (CBC).
+Se implementa en Python llamando a la biblioteca **PuLP** para resolver problemas de programación lineal. El solver utilizado es el predeterminado de PuLP (CBC).
 
 ### Dependencias
 - Python 3.x
 - PuLP (`pip install pulp`)
-- Matplotlib (para visualización, opcional)
+- Matplotlib (opcional para la visualización de los resultados)
 
-### Estructura del Código
-1. **Entradas**:
-   - Definir las dimensiones del contenedor `L, W, H`.
-   - Definir la lista de elementos con sus dimensiones.
+### Estructura General de la Codificación
+1. **Parámetros**:
+   - Definimos las dimensiones del contenedor `L, W, H`.
+   - Definimos la lista de cajas con sus dimensiones.
 
 2. **Variables de Decisión**:
-   - Variables para las posiciones `(x_i, y_i, z_i)`.
-   - Variables para la orientación `(lx_i, ly_i, lz_i, wx_i, wy_i, wz_i, hx_i, hy_i, hz_i)`.
-   - Variables para el posicionamiento relativo `(a_ij, b_ij, c_ij, d_ij, e_ij, f_ij)`.
+   - Variables para las coordenadas `(x_i, y_i, z_i)`.
+   - Variables para la orientación de las cajas `(lx_i, ly_i, lz_i, wx_i, wy_i, wz_i, hx_i, hy_i, hz_i)`.
+   - Variables para el posicionamiento relativo entre dos cajas`(a_ij, b_ij, c_ij, d_ij, e_ij, f_ij)`.
 
 3. **Restricciones**:
-   - Restricciones de orientación.
    - Restricciones del contenedor.
+   - Restricciones de orientación.
    - Restricciones de no solapamiento.
 
 4. **Función Objetivo**:
-   - Maximizar la cantidad de elementos empaquetados.
+   - Maximizar la cantidad de cajas empacadas.
 
-5. **Solucionador**:
-   - Resolver el problema utilizando el solucionador CBC.
+5. **Solver**:
+   - Resolver el problema utilizando el solucionador predeterminado de PULP.
 
 6. **Salida**:
    - Imprimir las posiciones y orientaciones de los elementos empaquetados.
@@ -147,7 +143,8 @@ El código está implementado en Python utilizando la biblioteca **PuLP** para p
       hz = pulp.LpVariable.dicts("hz", range(n), cat="Binary")
       ```
    - Variables binarias que representan la posición relativa entre dos cajas i y j.
-     - a: izquierda, b: derecha, c: atrás, d: adelante, e: abajor, f: arriba
+     - a: izquierda, b: derecha, c: atrás, d: adelante, e: abajo, f: arriba-
+     - Ejemplo: Si `a_ij` = 1, la caja `i` debe estar situada a la izquierda de la caja `k`
     ```bash
       # Variables binarias para el posicionamiento relativo de la caja i y la caja j
       a = pulp.LpVariable.dicts("a", [(i, j) for i in range(n) for j in range(n) if i != j], cat="Binary")
@@ -161,7 +158,7 @@ El código está implementado en Python utilizando la biblioteca **PuLP** para p
    - Corresponde a la maximización de sumatoria de las variables de decisión referentes a la orientación de la caja i. Esto dado que cada caja i debe tener una orientación con respecto a los ejes X-, Y- y Z-, asegurando así la asignación de las cajas al contenedor
      ```bash
       # Función objetivo: Maximizar la asignación de las cajas en el contenedor
-      model += pulp.lpSum([lx[i]+ly[i]+lz[i]+wx[i]+wy[i]+wz[i]+hx[i]+hy[i]+hz[i] for i in range(n)]), "Total-scheduling"
+      model += pulp.lpSum([lx[i] + ly[i] + lz[i] + wx[i] + wy[i] + wz[i] + hx[i] + hy[i] + hz[i] for i in range(n)]), "Total-scheduling"
   7. **Definimos las restricciones del modelo**:
    - Establecemos que cada dimensión de la caja i debe ser paralela a uno de los ejes X-, Y- y Z- exactamente una vez. Una vez escogida la rotación con la que se ubica la caja i, su respectiva dimensión solo puede ser paralela a un eje a la vez
      ```bash
@@ -210,7 +207,7 @@ El código está implementado en Python utilizando la biblioteca **PuLP** para p
              print("No se encontró una solución óptima.")
      
   9. **Visualización (Opcional)**:
-      - Usa matplotlib para visualizar los resultados
+      - Usamos matplotlib para visualizar los resultados
       ```bash
         import matplotlib.pyplot as plt
       from mpl_toolkits.mplot3d.art3d import Poly3DCollection
@@ -259,7 +256,7 @@ El código está implementado en Python utilizando la biblioteca **PuLP** para p
       plt.show()
       ```
    ## Análisis y Posibles Mejoras
-   - Aproximarse a la solución haciendo uso de otros métodos de optimización o algoritmos exactos y partir de los resultados obtenidos para obtener una mejor solución.
+   - Aproximarse a la solución haciendo uso de otros métodos de optimización o algoritmos exactos y obtener una mejor solución a partir de los resultados.
    - Hacer uso de métodos constructivos para aproximarnos a la factibilidad, seguido de métodos heurísticos para encontrar una buena solución más eficientemente al ser este un problema NP-Hard.
    - Graficar la solución para entender la dinámica del posicionamiento de las cajas, así como para verificar su no solapamiento.
 
